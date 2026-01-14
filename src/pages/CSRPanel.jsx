@@ -6,12 +6,15 @@ import './CSRPanel.css';
 const CSRPanel = () => {
   const { hasPermission } = useAuth();
   const [leads, setLeads] = useState([]);
+  const [filteredLeads, setFilteredLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingLead, setEditingLead] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [stats, setStats] = useState(null);
+  const [filterStatus, setFilterStatus] = useState('All');
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Form state
   const [formData, setFormData] = useState({
@@ -30,6 +33,24 @@ const CSRPanel = () => {
       loadStats();
     }
   }, []);
+
+  // Filter and search leads
+  useEffect(() => {
+    let filtered = leads;
+
+    if (filterStatus !== 'All') {
+      filtered = filtered.filter(lead => lead.status === filterStatus);
+    }
+
+    if (searchTerm) {
+      filtered = filtered.filter(lead =>
+        lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        lead.email.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    setFilteredLeads(filtered);
+  }, [leads, filterStatus, searchTerm]);
 
   const loadLeads = async () => {
     try {
@@ -179,21 +200,26 @@ const CSRPanel = () => {
       {stats && (
         <div className="stats-grid">
           <div className="stat-card">
-            <div className="stat-icon">📊</div>
+            <div className="stat-icon">🆕</div>
             <div className="stat-content">
-              <h3>{stats.total}</h3>
-              <p>Total Leads</p>
+              <h3>{stats.byStatus.find(s => s._id === 'New')?.count || 0}</h3>
+              <p>New Leads</p>
             </div>
           </div>
-          {stats.byStatus.map(stat => (
-            <div key={stat._id} className="stat-card">
-              <div className="stat-icon" style={{ color: getStatusColor(stat._id) }}>●</div>
-              <div className="stat-content">
-                <h3>{stat.count}</h3>
-                <p>{stat._id}</p>
-              </div>
+          <div className="stat-card">
+            <div className="stat-icon">✅</div>
+            <div className="stat-content">
+              <h3>{stats.byStatus.find(s => s._id === 'Converted')?.count || 0}</h3>
+              <p>Converted Leads</p>
             </div>
-          ))}
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">❌</div>
+            <div className="stat-content">
+              <h3>{stats.byStatus.find(s => s._id === 'Rejected')?.count || 0}</h3>
+              <p>Lost Leads</p>
+            </div>
+          </div>
         </div>
       )}
 
@@ -311,9 +337,38 @@ const CSRPanel = () => {
           </div>
         )}
 
+        {/* Filter and Search */}
+        <div className="leads-filters">
+          <div className="filter-group">
+            <label>🔍 Search:</label>
+            <input
+              type="text"
+              placeholder="Search by name or email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+          </div>
+          <div className="filter-group">
+            <label>🔍 Filter by Status:</label>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="filter-select"
+            >
+              <option value="All">All Status</option>
+              <option value="New">New</option>
+              <option value="Contacted">Contacted</option>
+              <option value="Qualified">Qualified</option>
+              <option value="Converted">Converted</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+
         <div className="leads-list">
-          <h3>All Leads ({leads.length})</h3>
-          {leads.length === 0 ? (
+          <h3>All Leads ({filteredLeads.length})</h3>
+          {filteredLeads.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">📋</div>
               <p>No leads found. Create your first lead to get started.</p>
@@ -321,46 +376,44 @@ const CSRPanel = () => {
           ) : (
             <div className="leads-table-container">
               <table className="leads-table">
-                <thead>
+                <thead className="sticky-header">
                   <tr>
                     <th>Name</th>
                     <th>Email</th>
                     <th>Phone</th>
-                    <th>Source</th>
                     <th>Status</th>
-                    <th>Created</th>
+                    <th>Assigned CSR</th>
+                    <th>Created Date</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {leads.map(lead => (
+                  {filteredLeads.map(lead => (
                     <tr key={lead._id}>
                       <td className="lead-name">{lead.name}</td>
                       <td>{lead.email}</td>
                       <td>{lead.phone}</td>
-                      <td>{lead.source}</td>
                       <td>
-                        <span 
-                          className="status-badge" 
+                        <span
+                          className="status-badge"
                           style={{ backgroundColor: getStatusColor(lead.status) }}
                         >
-                          {lead.status}
+                          {lead.status === 'Converted' ? 'Won' : lead.status === 'Rejected' ? 'Lost' : lead.status}
                         </span>
                       </td>
+                      <td>{lead.createdBy?.name || 'N/A'}</td>
                       <td>{new Date(lead.createdAt).toLocaleDateString()}</td>
                       <td className="actions-cell">
-                        {hasPermission('edit_leads') && (
-                          <button 
-                            className="btn-icon" 
-                            onClick={() => handleEditLead(lead)}
-                            title="Edit Lead"
-                          >
-                            ✏️
-                          </button>
-                        )}
+                        <button
+                          className="btn-icon"
+                          onClick={() => handleEditLead(lead)}
+                          title="View / Edit"
+                        >
+                          👁️
+                        </button>
                         {hasPermission('delete_leads') && (
-                          <button 
-                            className="btn-icon" 
+                          <button
+                            className="btn-icon"
                             onClick={() => handleDeleteLead(lead._id)}
                             title="Delete Lead"
                           >

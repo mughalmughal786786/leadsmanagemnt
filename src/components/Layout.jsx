@@ -6,13 +6,21 @@ import './Layout.css';
 
 const Layout = () => {
   return (
-    <div className="layout">
+    <div className="app-shell">
+      {/* Top Navbar */}
       <Navbar />
-      <div className="layout-container">
+
+      {/* Body */}
+      <div className="app-body">
+        {/* Sidebar */}
         <Sidebar />
-        <main className="main-content">
-          <Outlet />
-        </main>
+
+        {/* Main Content Area */}
+        <div className="app-content">
+          <div className="content-wrapper">
+            <Outlet />
+          </div>
+        </div>
       </div>
     </div>
   );

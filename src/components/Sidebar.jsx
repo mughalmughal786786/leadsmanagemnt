@@ -1,50 +1,127 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import './Sidebar.css';
+import React from "react";
+import { NavLink } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import "./Sidebar.css";
 
 const Sidebar = () => {
-  const location = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
-  const menuItems = [
-    { 
-      path: '/admin', 
-      label: 'Admin Panel', 
-      icon: '👤',
-      roles: ['admin']
+  if (!user) return null;
+
+  const mainMenu = [
+    {
+      label: "Dashboard",
+      path: "/",
+      icon: "📊",
+      roles: ["admin", "csr"],
     },
-    { 
-      path: '/csr', 
-      label: 'CSR Panel', 
-      icon: '📞',
-      roles: ['admin', 'csr']
+    {
+      label: "Leads",
+      path: "/csr",
+      icon: "📋",
+      roles: ["admin", "csr"],
+    },
+    {
+      label: "Projects",
+      path: "/projects",
+      icon: "📁",
+      roles: ["admin", "csr"],
+    },
+    {
+      label: "Invoices",
+      path: "/invoices",
+      icon: "💰",
+      roles: ["admin", "csr"],
+    },
+    {
+      label: "Payments",
+      path: "/payments",
+      icon: "💳",
+      roles: ["admin", "csr"],
+    },
+    {
+      label: "Reports",
+      path: "/reports",
+      icon: "📈",
+      roles: ["admin", "csr"],
     },
   ];
 
-  // Filter menu items based on user role
-  const visibleMenuItems = menuItems.filter(item => {
-    if (!user) return false;
-    return item.roles.includes(user.role);
-  });
+  const bottomMenu = [
+    {
+      label: "Users",
+      path: "/admin",
+      icon: "👥",
+      roles: ["admin"],
+    },
+    {
+      label: "Settings",
+      path: "/settings",
+      icon: "⚙️",
+      roles: ["admin", "csr"],
+    },
+  ];
 
   return (
     <aside className="sidebar">
+      {/* LOGO */}
       <div className="sidebar-header">
         <div className="sidebar-logo">ALI.</div>
         <div className="sidebar-title">Ali Technologies</div>
       </div>
-      <div className="sidebar-menu">
-        {visibleMenuItems.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={`sidebar-item ${location.pathname === item.path ? 'active' : ''}`}
-          >
-            <span className="sidebar-icon">{item.icon}</span>
-            <span className="sidebar-label">{item.label}</span>
-          </Link>
-        ))}
+
+      {/* MENU */}
+      <nav className="sidebar-menu">
+        {/* Main Menu */}
+        {mainMenu
+          .filter((item) => item.roles.includes(user.role))
+          .map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.path === "/"}
+              className={({ isActive }) =>
+                `sidebar-item ${isActive ? "active" : ""}`
+              }
+            >
+              <span className="sidebar-icon">{item.icon}</span>
+              <span className="sidebar-label">{item.label}</span>
+            </NavLink>
+          ))}
+
+        {/* Separator */}
+        <div className="sidebar-separator"></div>
+
+        {/* Bottom Menu */}
+        {bottomMenu
+          .filter((item) => item.roles.includes(user.role))
+          .map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.path === "/"}
+              className={({ isActive }) =>
+                `sidebar-item ${isActive ? "active" : ""}`
+              }
+            >
+              <span className="sidebar-icon">{item.icon}</span>
+              <span className="sidebar-label">{item.label}</span>
+            </NavLink>
+          ))}
+
+        {/* Logout */}
+        <button
+          className="sidebar-item logout-btn"
+          onClick={logout}
+        >
+          <span className="sidebar-icon">🚪</span>
+          <span className="sidebar-label">Logout</span>
+        </button>
+      </nav>
+
+      {/* FOOTER */}
+      <div className="sidebar-footer">
+        <small>© {new Date().getFullYear()} Ali Technologies</small>
       </div>
     </aside>
   );

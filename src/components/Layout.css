@@ -1,18 +1,38 @@
-.layout {
-  min-height: 100vh;
+/* Root layout */
+.app-shell {
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  background: #f8f9fa;
+  color: #333;
 }
 
-.layout-container {
+/* Navbar stays fixed height */
+.app-body {
+  flex: 1;
   display: flex;
-  flex: 1;
+  overflow: hidden;
 }
 
-.main-content {
+/* Sidebar fixed */
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  background: #ffffff;
+  border-right: 1px solid #e9ecef;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+}
+
+/* Main content scrolls */
+.app-content {
   flex: 1;
-  padding: 2rem;
-  background-color: var(--bg-primary);
   overflow-y: auto;
-  height: calc(100vh - 60px);
+  background: #f8f9fa;
+}
+
+/* Centered dashboard container (Duralux feel) */
+.content-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px;
 }

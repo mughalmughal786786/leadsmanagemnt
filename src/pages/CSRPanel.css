@@ -211,6 +211,43 @@
   margin-top: 1.5rem;
 }
 
+/* Filter and Search */
+.leads-filters {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-group label {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.search-input,
+.filter-select {
+  padding: 0.75rem;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.search-input:focus,
+.filter-select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
 /* Leads List */
 .leads-list {
   margin-top: 2rem;
@@ -236,6 +273,9 @@
 
 .leads-table thead {
   background-color: var(--bg-tertiary);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .leads-table th {
