@@ -1,10 +1,13 @@
 import axios from "axios";
 
 // =========================
-// BASE API CONFIG
+// BASE API CONFIG (PRODUCTION SAFE)
 // =========================
-const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL;
+
+if (!API_URL) {
+  console.error("❌ VITE_API_URL is not defined in environment variables");
+}
 
 const api = axios.create({
   baseURL: API_URL,
@@ -38,14 +41,16 @@ export const authAPI = {
 
   login: async (data) => {
     const res = await api.post("/auth/login", data);
+
     if (res.data?.token) {
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
     }
+
     return res.data;
   },
 
-  logout: async () => {
+  logout: () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     return { success: true };
@@ -72,10 +77,9 @@ export const adminAPI = {
   },
 
   updateCSRPermissions: async (id, permissions) => {
-    const res = await api.put(
-      `/admin/csrs/${id}/permissions`,
-      { permissions }
-    );
+    const res = await api.put(`/admin/csrs/${id}/permissions`, {
+      permissions,
+    });
     return res.data;
   },
 
@@ -156,7 +160,7 @@ export const projectAPI = {
 };
 
 // =========================
-// PAYMENT API (ONLY PAYMENTS)
+// PAYMENT API
 // =========================
 export const paymentAPI = {
   getAllPayments: async () => {
@@ -185,15 +189,13 @@ export const paymentAPI = {
   },
 
   getPaymentsByProject: async (projectId) => {
-    const res = await api.get(
-      `/payments/project/${projectId}`
-    );
+    const res = await api.get(`/payments/project/${projectId}`);
     return res.data;
   },
 };
 
 // =========================
-// INVOICE API (SEPARATE SYSTEM ✅)
+// INVOICE API
 // =========================
 export const invoiceAPI = {
   getInvoices: async () => {
